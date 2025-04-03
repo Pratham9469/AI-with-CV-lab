@@ -1,0 +1,32 @@
+import copy, pandas as pd
+
+def const(h, e): return all(x=='?' or x==y for x,y in zip(h,e))
+def update_pos(G, S, e):
+    for j in range(len(S)):
+        S[j] = '?' if S[j]!='Null' and S[j]!=e[j] else e[j]
+def update_neg(G, S, e):
+    new_G = []
+    for g in G:
+        if const(g,e):
+            for i in range(len(e)):
+                if S[i]!='?' and S[i]!='Null' and e[i]!=S[i]:
+                    h = g.copy()
+                    h[i] = S[i]
+                    if h not in new_G: new_G.append(h)
+        else: new_G.append(g)
+    return new_G
+def sync(G, S): return [g for g in G if all(g[i]=='?' or g[i]==S[i] for i in range(len(S)))]
+data = pd.read_csv('cealgo.csv')
+instances = data.values.tolist()
+G = [['?']*len(instances[0][:-1]) for _ in range(len(instances[0][:-1]))]
+S = ['Null']*len(instances[0][:-1])
+for instance in instances:
+    e, l = instance[:-1], instance[-1]
+    print("Processing instance:", e, "Label:", l)
+    if l=='Yes': update_pos(G,S,e)
+    else: G = update_neg(G,S,e)
+    print(" (S):", S)
+    print(" (G):", G)
+G = sync(G,S)
+print("Final  (S):", S)
+print("Final  (G):", G)
